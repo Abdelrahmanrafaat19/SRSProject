@@ -1,0 +1,6 @@
+@SRSProject.APi_HostAddress = http://localhost:5280
+
+GET {{SRSProject.APi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
