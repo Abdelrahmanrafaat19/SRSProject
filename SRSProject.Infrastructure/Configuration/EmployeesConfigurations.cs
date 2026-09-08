@@ -15,7 +15,7 @@ namespace SRSProject.Infrastructure.Configuration
         {
             
             
-
+            
 
             builder.HasIndex(employee => employee.NationalId)
                 .IsUnique()

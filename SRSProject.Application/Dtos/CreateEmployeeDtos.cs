@@ -10,6 +10,7 @@ namespace SRSProject.Application.Dtos
 
         public string NationalID { get; set; } = default!;
 
+        public string Role { get; set; } = default!;
         public DateOnly? BirthDate { get; set; } = default!;
 
         public decimal? BasicSalary { get; set; } = default!;

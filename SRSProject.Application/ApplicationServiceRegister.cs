@@ -12,6 +12,8 @@ namespace SRSProject.Application
         public static IServiceCollection AddApplicationServices(this IServiceCollection services)
         {
             services.AddScoped<IEmployeeService, EmployeeServices>();
+       
+
             return services;
         }
     }
