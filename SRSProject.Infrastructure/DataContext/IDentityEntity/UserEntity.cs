@@ -10,6 +10,7 @@ namespace SRSProject.Infrastructure.DataContext.IDentityEntity
     public class UserEntity : IdentityUser
     {
         public EmployeeEntity? Employee { get; set; }
+        public string DisplayName { get; set; } = default!;
         public int? EmployeeId { get; set; }
         public bool MustChangePassword { get; set; } = true;
     }

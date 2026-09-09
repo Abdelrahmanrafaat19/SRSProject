@@ -81,9 +81,9 @@ namespace SRSProject.Application.Services
                 var createUserResult =
                     await _userManager.CreateEmployeeAccountAsync(
                         data.Role,
-                        employee.FullName,
+                        data.FullName,
                         employee.Id,
-                        employee.NationalId);
+                        data.NationalID);
 
                 if (!createUserResult.IsSuccess)
                 {

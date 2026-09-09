@@ -1,8 +1,6 @@
 ﻿using SRSProject.Application.Dtos.Identity.loginDtos;
 using StockManagment.Application.common;
-using System;
-using System.Collections.Generic;
-using System.Text;
+
 
 namespace SRSProject.Application.Contracts
 {
@@ -15,5 +13,11 @@ namespace SRSProject.Application.Contracts
            int employeeId,
            string nationalId,
            CancellationToken cancellationToken = default);
+
+
+        public Task<Result<bool>> ChangePasswordAsync(
+            string NationaID,
+            string newPassword,
+            CancellationToken cancellationToken = default);
     }
 }

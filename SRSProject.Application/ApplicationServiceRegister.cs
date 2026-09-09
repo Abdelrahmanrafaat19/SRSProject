@@ -13,7 +13,7 @@ namespace SRSProject.Application
         {
             services.AddScoped<IEmployeeService, EmployeeServices>();
        
-
+            services.AddScoped<IAuthenticationService, AuthenticationService>();
             return services;
         }
     }

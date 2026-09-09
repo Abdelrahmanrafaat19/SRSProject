@@ -21,13 +21,45 @@ namespace SRSProject.Infrastructure.Repository
             this.roleManager = roleManager;
             this._jwtCreator = jwtCreator;
         }
-        public async Task<Result<string>> CreateEmployeeAccountAsync(string Role, string fullName, int employeeId, string nationalId, CancellationToken cancellationToken = default)
+
+        public async Task<Result<bool>> ChangePasswordAsync(string NationalID, string newPassword, CancellationToken cancellationToken = default)
         {
+            var userIsExit = await userManager.FindByNameAsync(NationalID);
+
+            if (userIsExit is null)
+            {
+                return Result<bool>.Failure(
+                      Error.NotFound(
+                          "ErrorType.UserNotFound",
+                          "User Not Exist"
+                      )
+                    );
+
+            }
+
+
+            var passwordChanged = await userManager.ChangePasswordAsync(userIsExit, "123", newPassword);
+            if (!passwordChanged.Succeeded)
+            {
+                return Result<bool>.Failure(
+                    Error.Failure(
+                        "Identity.PasswordChangeFailed",
+                        "Failed to change password"
+                    )
+                );
+            }
+
+            return Result<bool>.Success(true);
+        }
+
+        public async Task<Result<string>> CreateEmployeeAccountAsync(string Role, string name, int employeeId, string nationalId, CancellationToken cancellationToken = default)
+        {
+
             cancellationToken.ThrowIfCancellationRequested();
 
             var user = new UserEntity
             {
-                NormalizedUserName = fullName,
+                DisplayName = name,
                 UserName = nationalId,
                 EmployeeId = employeeId,
                 MustChangePassword = true
@@ -90,12 +122,13 @@ namespace SRSProject.Infrastructure.Repository
                         "Password is not correct "));
             }
             var roles = await userManager.GetRolesAsync(user);
-            var token = _jwtCreator.CreateToken(user.Email, user.UserName, user.Id, roles ?? Array.Empty<string>(), cancellationToken);
+            var token = _jwtCreator.CreateToken(user.Email, user.DisplayName, user.Id, roles ?? Array.Empty<string>(), cancellationToken);
 
             var result = new PresentationLoginDtos
             {
+                ID = user.Id,
                 NationalID = user.UserName,
-                DisplayName = user.NormalizedUserName,
+                DisplayName = user.DisplayName,
                 Token = token
             };
 
