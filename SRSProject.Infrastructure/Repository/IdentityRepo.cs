@@ -122,7 +122,7 @@ namespace SRSProject.Infrastructure.Repository
                         "Password is not correct "));
             }
             var roles = await userManager.GetRolesAsync(user);
-            var token = _jwtCreator.CreateToken(user.Email, user.DisplayName, user.Id, roles ?? Array.Empty<string>(), cancellationToken);
+            var token = _jwtCreator.CreateToken(user.Email, user.DisplayName, user.EmployeeId, user.Id, roles ?? Array.Empty<string>(), cancellationToken);
 
             var result = new PresentationLoginDtos
             {

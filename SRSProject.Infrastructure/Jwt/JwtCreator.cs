@@ -20,7 +20,7 @@ namespace SRSProject.Infrastructure.Jwt
             _user = user;
             _jwtSettings = jwtSettings;
         }
-        public string CreateToken(string? email, string userName, string id, IList<string>? Roles, CancellationToken cancellationToken)
+        public string CreateToken(string? email, string userName, int EmployID, string id, IList<string>? Roles, CancellationToken cancellationToken)
         {
             #region Claims
             var Claims = new List<Claim>
@@ -28,6 +28,7 @@ namespace SRSProject.Infrastructure.Jwt
                 new Claim(ClaimTypes.Email, email ?? string.Empty),
                 new Claim(ClaimTypes.Name,userName!),
                 new Claim(ClaimTypes.NameIdentifier,id!),
+                new Claim("EmployeeId",EmployID.ToString())
             };
             Claims.AddRange(Roles!.Select(role => new Claim(ClaimTypes.Role, role)));
             #endregion

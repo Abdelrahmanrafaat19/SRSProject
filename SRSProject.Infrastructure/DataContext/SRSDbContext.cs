@@ -20,5 +20,6 @@ namespace SRSProject.Infrastructure.DataContext
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(SRSDbContext).Assembly);
         }
         public DbSet<EmployeeEntity> Employees { get; set; }
+        public DbSet<AttendanceRecord> AttendanceRecords { get; set; }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SRSProject.Infrastructure.DataContext;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -18,7 +19,9 @@ namespace SRSProject.Domain.Entities
         public TimeOnly ExpectedCheckInTime { get; set; }
         public TimeOnly ExpectedCheckOutTime { get; set; }
 
-        public bool IsActive { get; set; } = true; 
+        public bool IsActive { get; set; } = true;
+
+        public ICollection<AttendanceRecord> AttendanceRecords { get; set; } = [];
 
     }
 }

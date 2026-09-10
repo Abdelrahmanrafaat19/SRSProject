@@ -23,6 +23,7 @@ namespace SRSProject.APi.Controllers
         [HttpPost("GetAllEmployees")]
         public async Task<IActionResult> GetAllEmployees([FromQuery] EmployeeSpecificationParameters parameters, CancellationToken cancellationToken)
         {
+
             var result = await _employeeService.GetAllAsync(parameters, cancellationToken);
             return HandleResult(result);
         }

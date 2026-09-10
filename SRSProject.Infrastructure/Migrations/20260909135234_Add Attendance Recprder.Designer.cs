@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SRSProject.Infrastructure.DataContext;
 
@@ -11,9 +12,11 @@ using SRSProject.Infrastructure.DataContext;
 namespace SRSProject.Infrastructure.Migrations
 {
     [DbContext(typeof(SRSDbContext))]
-    partial class SRSDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260909135234_Add Attendance Recprder")]
+    partial class AddAttendanceRecprder
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -239,10 +242,10 @@ namespace SRSProject.Infrastructure.Migrations
                     b.Property<int>("EmployeeId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("LateMinutes")
+                    b.Property<int>("LateMinutes")
                         .HasColumnType("int");
 
-                    b.Property<int?>("OvertimeMinutes")
+                    b.Property<int>("OvertimeMinutes")
                         .HasColumnType("int");
 
                     b.Property<int>("Status")

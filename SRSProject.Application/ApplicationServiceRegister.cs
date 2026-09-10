@@ -11,9 +11,9 @@ namespace SRSProject.Application
     {
         public static IServiceCollection AddApplicationServices(this IServiceCollection services)
         {
-            services.AddScoped<IEmployeeService, EmployeeServices>();
-       
+            services.AddScoped<IEmployeeService, EmployeeServices>(); 
             services.AddScoped<IAuthenticationService, AuthenticationService>();
+            services.AddScoped<IAttendanceRecordService, AttendanceRecordService>();
             return services;
         }
     }
