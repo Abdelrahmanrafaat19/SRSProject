@@ -35,5 +35,51 @@ namespace SRSProject.Application.Services
             }
             return Result<bool>.Failure(Error.Failure("ErrorType" , "Not Checkin"));
         }
+
+        public async Task<Result<bool>> CheckOutAsync(CheckOutDtos data)
+        {
+            TimeSpan workEndTime = new TimeSpan(0, 0, 0);
+
+            TimeSpan checkOutTime = data.CheckOutTime.ToTimeSpan();
+
+            double overtimeMinutes = 0;
+            double notCompleteMinutes = 0;
+
+            if (checkOutTime > workEndTime)
+            {
+                overtimeMinutes = (checkOutTime - workEndTime).TotalMinutes;
+            }
+            else if (checkOutTime < workEndTime)
+            {
+                notCompleteMinutes = (workEndTime - checkOutTime).TotalMinutes;
+            }
+
+            var attendance = new AttendanceRecord
+            {
+                AttendanceDate = data.AttendanceDate,
+                CheckOutTime = data.CheckOutTime,
+                EmployeeId = data.EmployeeId,
+
+                OvertimeMinutes = (int)overtimeMinutes,
+
+                Status = notCompleteMinutes > 0
+                    ? AttendanceStatus.NotCompleteYourTime
+                    : AttendanceStatus.Intime
+            };
+
+            await _unitOfWork.Repository<int, AttendanceRecord>()
+                .AddAsync(attendance);
+
+            var result = await _unitOfWork.SaveChangesAsync();
+
+            if (result > 0)
+            {
+                return Result<bool>.Success(true);
+            }
+
+            return Result<bool>.Failure(
+                Error.Failure("ErrorType", "Not Checkout")
+            );
+        }
     }
 }

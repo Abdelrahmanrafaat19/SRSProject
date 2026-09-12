@@ -1,0 +1,48 @@
+﻿[
+  {
+    "Id": 1,
+    "EmployeeId": 2,
+    "AttendanceDate": "2026-09-12",
+    "CheckOutTime": "23:25:29.6816215",
+    "OvertimeMinutes": 1105,
+    "Status": 6
+  },
+  {
+    "Id": 2,
+    "EmployeeId": 2,
+    "AttendanceDate": "2026-09-12",
+    "CheckOutTime": "23:26:49.3555446",
+    "OvertimeMinutes": 686,
+    "Status": 6
+  },
+  {
+    "Id": 3,
+    "EmployeeId": 2,
+    "AttendanceDate": "2026-09-12",
+    "CheckOutTime": "23:28:37.3544228",
+    "OvertimeMinutes": 1348,
+    "Status": 6
+  },
+  {
+    "Id": 4,
+    "EmployeeId": 2,
+    "AttendanceDate": "2026-09-12",
+    "CheckInTime": "23:39:39.7152358",
+    "Status": 5
+  },
+  {
+    "Id": 5,
+    "EmployeeId": 2,
+    "AttendanceDate": "2026-09-12",
+    "CheckInTime": "23:43:17.6978006",
+    "Status": 5
+  },
+  {
+    "Id": 6,
+    "EmployeeId": 2,
+    "AttendanceDate": "2026-09-12",
+    "CheckOutTime": "23:43:37.7175815",
+    "OvertimeMinutes": 1423,
+    "Status": 6
+  }
+]

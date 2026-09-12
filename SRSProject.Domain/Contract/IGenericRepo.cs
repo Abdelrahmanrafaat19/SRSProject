@@ -55,7 +55,7 @@ namespace SRSProject.Domain.Contract
 
         void Update(TEntity entity);
 
-        void Delete(TEntity entity);
+        Task Delete(TEntity entity);
 
         void DeleteRange(IEnumerable<TEntity> entities);
     }

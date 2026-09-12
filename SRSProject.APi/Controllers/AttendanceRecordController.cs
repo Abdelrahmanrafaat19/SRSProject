@@ -16,7 +16,7 @@ namespace SRSProject.APi.Controllers
         {
             _attendanceRecordService = attendanceRecordService;
         }
-        [HttpPost("AddAttendanceRecord")]
+        [HttpPost("AddAttendanceRecordCheckIn")]
         [Authorize]
         public async Task<IActionResult> AddAttendanceRecord()
         {
@@ -27,6 +27,19 @@ namespace SRSProject.APi.Controllers
             });
             return HandleResult(result);
         }
-       
+
+
+        [HttpPost("AddAttendanceRecordCheckOut")]
+        [Authorize]
+        public async Task<IActionResult> AddAttendanceRecordCheckOut()
+        {
+            var employeeIdValue = User.FindFirstValue("EmployeeId");
+            var result = await _attendanceRecordService.CheckOutAsync(new CheckOutDtos
+            {
+                EmployeeId = int.Parse(employeeIdValue)
+            });
+            return HandleResult(result);
+        }
+
     }
 }

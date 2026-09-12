@@ -9,5 +9,6 @@ namespace SRSProject.Application.Contracts
     public interface IAttendanceRecordService
     {
         public Task<Result<bool>> CheckInAsync(CheckInDtos data);
+        public Task<Result<bool>> CheckOutAsync(CheckOutDtos data);
     }
 }

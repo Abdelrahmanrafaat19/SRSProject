@@ -87,7 +87,7 @@ namespace SRSProject.Infrastructure.Repostory
             _dbSet.Update(entity);
         }
 
-        public void Delete(TEntity entity)
+        public async Task Delete(TEntity entity)
         {
             _dbSet.Remove(entity);
         }

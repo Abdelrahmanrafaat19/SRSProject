@@ -11,6 +11,7 @@ namespace SRSProject.Domain.Entities
         Late = 5,
         Intime = 6,
         WeeklyHoliday = 3,
-        OfficialHoliday = 4
+        OfficialHoliday = 4,
+        NotCompleteYourTime=7
     }
 }
