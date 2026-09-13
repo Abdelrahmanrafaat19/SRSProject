@@ -41,5 +41,23 @@ namespace SRSProject.APi.Controllers
             return HandleResult(result);
         }
 
+
+        [HttpGet("GetAttendanceReportForEmployee")]
+        [Authorize]
+        public async Task<IActionResult> GetAttendanceReport(DateOnly? from, DateOnly? to)
+        {
+            var employeeIdValue = User.FindFirstValue("EmployeeId");
+            var result = await _attendanceRecordService.GetReportForEmployeeAsync(int.Parse(employeeIdValue), from, to);
+            return HandleResult(result);
+        }
+
+        [HttpGet("GetAttendanceReportForAdmin")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> GetAttendanceReportForAdmin(DateOnly? from, DateOnly? to)
+        {
+            var result = await _attendanceRecordService.GetReportForAdminAsync(null, from, to);
+            return HandleResult(result);
+        }
+
     }
 }

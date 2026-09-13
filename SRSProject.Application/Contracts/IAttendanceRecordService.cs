@@ -10,5 +10,14 @@ namespace SRSProject.Application.Contracts
     {
         public Task<Result<bool>> CheckInAsync(CheckInDtos data);
         public Task<Result<bool>> CheckOutAsync(CheckOutDtos data);
+        public Task<Result<AttendanceReportDto>> GetReportForEmployeeAsync(
+            int? employeeId,
+            DateOnly? from,
+            DateOnly? to);
+
+        public Task<Result<AttendanceReportDto>> GetReportForAdminAsync(
+            string? NationalID,
+            DateOnly? from,
+            DateOnly? to);
     }
 }
