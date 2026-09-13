@@ -136,7 +136,6 @@ namespace SRSProject.Application.Services
                 }
                 else
                 {
-                    // no checkout -> consider whole remaining day as not-complete
                     var minutes = (expectedEnd.ToTimeSpan() - attendance.CheckInTime!.Value.ToTimeSpan()).TotalMinutes;
                     if (minutes > 0)
                         report.NotCompleteHours += minutes / 60.0;
@@ -153,7 +152,8 @@ namespace SRSProject.Application.Services
 
         public async Task<Result<AttendanceReportDto>> GetReportForAdminAsync(string? NationalID, DateOnly? from, DateOnly? to)
         {
-            // default dates
+          
+
             var toDate = to ?? DateOnly.FromDateTime(DateTime.Now);
             var fromDate = from ?? toDate;
 

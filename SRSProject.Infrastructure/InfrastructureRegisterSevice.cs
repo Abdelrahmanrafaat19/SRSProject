@@ -35,6 +35,7 @@ namespace SRSProject.Infrastructure
             .AddDefaultTokenProviders();
             serviceProvider.AddScoped<IUnitOfWork, UnitOfWork>();
             serviceProvider.AddScoped<IIdentityService, IdentityRepo>();
+            serviceProvider.AddScoped<IUserService, UserService>();
             serviceProvider.AddScoped<IJwtCreator, JwtCreator>();
             var jwtSettings = configuration
                                              .GetSection("JwtSettings")
