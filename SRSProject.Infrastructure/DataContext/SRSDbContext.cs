@@ -21,5 +21,6 @@ namespace SRSProject.Infrastructure.DataContext
         }
         public DbSet<EmployeeEntity> Employees { get; set; }
         public DbSet<AttendanceRecord> AttendanceRecords { get; set; }
+        public DbSet<OfficialHolidayEntity> OfficialHolidays { get; set; }
     }
 }

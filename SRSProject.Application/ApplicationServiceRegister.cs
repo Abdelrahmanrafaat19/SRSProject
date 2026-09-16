@@ -14,6 +14,7 @@ namespace SRSProject.Application
             services.AddScoped<IEmployeeService, EmployeeServices>(); 
             services.AddScoped<IAuthenticationService, AuthenticationService>();
             services.AddScoped<IAttendanceRecordService, AttendanceRecordService>();
+            services.AddScoped<IOfficialHolidayService, OfficialHolidayService>();
             return services;
         }
     }
