@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using SRSProject.Application.Contracts;
+using SRSProject.Application.Profiles;
 using SRSProject.Application.Services;
 using System;
 using System.Collections.Generic;
@@ -11,10 +12,12 @@ namespace SRSProject.Application
     {
         public static IServiceCollection AddApplicationServices(this IServiceCollection services)
         {
+            services.AddAutoMapper(option=> option.AddProfile<WeeklyHolidayProfile>());
             services.AddScoped<IEmployeeService, EmployeeServices>(); 
             services.AddScoped<IAuthenticationService, AuthenticationService>();
             services.AddScoped<IAttendanceRecordService, AttendanceRecordService>();
             services.AddScoped<IOfficialHolidayService, OfficialHolidayService>();
+            services.AddScoped<IWeeklyHolidayService, WeeklyHolidayService>();
             return services;
         }
     }
