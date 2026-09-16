@@ -4,6 +4,7 @@ using SRSProject.Application.Contracts;
 using SRSProject.Application.Dtos;
 using SRSProject.Domain.Contract;
 using SRSProject.Domain.Entities;
+using SRSProject.Infrastructure;
 using SRSProject.Infrastructure.DataContext;
 using StockManagment.Application.common;
 using System.Linq;
@@ -13,15 +14,21 @@ namespace SRSProject.Application.Services
     public class AttendanceRecordService : IAttendanceRecordService
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IOfficialHolidayService _officialHolidayService;
 
-        public AttendanceRecordService(IUnitOfWork unitOfWork)
+        public AttendanceRecordService(IUnitOfWork unitOfWork, IOfficialHolidayService officialHolidayService)
         {
             _unitOfWork = unitOfWork;
+            _officialHolidayService = officialHolidayService;
         }
 
         public async Task<Result<AttendanceReportDto>> GetReportForEmployeeAsync(int? employeeId, DateOnly? from, DateOnly? to)
         {
-            
+            var officalDays = (await _officialHolidayService.Grid(CancellationToken.None)).Value.Select(h => new
+            {
+                Day = h.Day,
+                Month = h.Month,
+            }).ToList();
             var toDate = to ?? DateOnly.FromDateTime(DateTime.Now);
             var fromDate = from ?? toDate;
 
@@ -34,7 +41,7 @@ namespace SRSProject.Application.Services
 
             if (employeeId is null)
             {
-                
+
                 var repoAll = _unitOfWork.Repository<int, AttendanceRecord>();
                 var recordsAll = await repoAll.FindAsync(a => a.AttendanceDate >= fromDate && a.AttendanceDate <= toDate);
 
@@ -43,17 +50,25 @@ namespace SRSProject.Application.Services
 
                 report.TotalDays = daysAll.Count;
 
-                
+
                 var expectedEndAll = new TimeOnly(17, 0);
 
-                
+
                 var grouped = recordsAll.GroupBy(r => r.EmployeeId);
                 foreach (var group in grouped)
                 {
                     var recs = group.ToList();
                     foreach (var day in daysAll)
                     {
+                        var isOfficialHoliday = officalDays.Any(h => h.Day == day.Day && h.Month == day.Month);
                         var attendance = recs.FirstOrDefault(r => r.AttendanceDate == day);
+
+                        if (isOfficialHoliday)
+                        {
+                            report.OfficalDays++;
+                            continue;
+                        }
+
                         if (attendance == null || !attendance.CheckInTime.HasValue)
                         {
                             report.AbsentDays++;
@@ -100,7 +115,7 @@ namespace SRSProject.Application.Services
 
             var records = await repo.FindAsync(a => a.EmployeeId == employeeId && a.AttendanceDate >= fromDate && a.AttendanceDate <= toDate);
 
-           
+
             var days = new List<DateOnly>();
             for (var d = fromDate; d <= toDate; d = d.AddDays(1)) days.Add(d);
 
@@ -108,7 +123,14 @@ namespace SRSProject.Application.Services
 
             foreach (var day in days)
             {
+                var isOfficialHoliday = officalDays.Any(h => h.Day == day.Day && h.Month == day.Month);
                 var attendance = records.FirstOrDefault(r => r.AttendanceDate == day);
+
+                if (isOfficialHoliday)
+                {
+                    report.OfficalDays++;
+                    continue;
+                }
 
                 if (attendance == null || !attendance.CheckInTime.HasValue)
                 {
@@ -152,7 +174,7 @@ namespace SRSProject.Application.Services
 
         public async Task<Result<AttendanceReportDto>> GetReportForAdminAsync(string? NationalID, DateOnly? from, DateOnly? to)
         {
-          
+
 
             var toDate = to ?? DateOnly.FromDateTime(DateTime.Now);
             var fromDate = from ?? toDate;
@@ -174,6 +196,11 @@ namespace SRSProject.Application.Services
         }
         public async Task<Result<bool>> CheckInAsync(CheckInDtos data)
         {
+            // Validate official holiday: do not allow check-in on official holidays
+            var officalDays = (await _officialHolidayService.Grid(CancellationToken.None)).Value;
+            var isOfficialHoliday = officalDays.Any(h => h.Day == data.AttendanceDate.Day && h.Month == data.AttendanceDate.Month);
+        
+
             var repo = _unitOfWork.Repository<int, AttendanceRecord>();
             var exists = await repo.AnyAsync(a => a.EmployeeId == data.EmployeeId && a.AttendanceDate == data.AttendanceDate);
             if (exists)
@@ -188,7 +215,7 @@ namespace SRSProject.Application.Services
                 CheckInTime = data.CheckInTime,
                 EmployeeId = data.EmployeeId,
                 LateMinutes = minutesLate > 0 ? (int)minutesLate : 0,
-                Status = minutesLate > 0 ? AttendanceStatus.Late : AttendanceStatus.Intime,
+                Status = isOfficialHoliday? AttendanceStatus.Intime : (minutesLate > 0 ? AttendanceStatus.Late : AttendanceStatus.Intime),
             };
 
             await repo.AddAsync(attendance);
@@ -204,6 +231,11 @@ namespace SRSProject.Application.Services
 
         public async Task<Result<bool>> CheckOutAsync(CheckOutDtos data)
         {
+            // Validate official holiday: do not allow check-out on official holidays
+            var officalDays = (await _officialHolidayService.Grid(CancellationToken.None)).Value;
+            var isOfficialHoliday = officalDays.Any(h => h.Day == data.AttendanceDate.Day && h.Month == data.AttendanceDate.Month);
+         
+
             var repo = _unitOfWork.Repository<int, AttendanceRecord>();
 
             var records = await repo.FindAsync(a => a.EmployeeId == data.EmployeeId && a.AttendanceDate == data.AttendanceDate);
@@ -211,7 +243,7 @@ namespace SRSProject.Application.Services
 
             if (attendance == null)
             {
-             
+
                 return Result<bool>.Failure(Error.Failure("Validation", "No check-in record found for this employee and date"));
             }
 
@@ -233,17 +265,18 @@ namespace SRSProject.Application.Services
 
             attendance.CheckOutTime = data.CheckOutTime;
             attendance.OvertimeMinutes = overtimeMinutes;
+             
 
 
             if (!attendance.CheckInTime.HasValue)
             {
                 attendance.Status = AttendanceStatus.Absent;
             }
-            else if (attendance.LateMinutes.HasValue && attendance.LateMinutes > 0)
+            else if (attendance.LateMinutes.HasValue && attendance.LateMinutes > 0&&!isOfficialHoliday)
             {
                 attendance.Status = AttendanceStatus.Late;
             }
-            else if (notCompleteMinutes > 0)
+            else if (notCompleteMinutes > 0&&!isOfficialHoliday)
             {
                 attendance.Status = AttendanceStatus.NotCompleteYourTime;
             }

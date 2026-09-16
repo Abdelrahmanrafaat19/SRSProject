@@ -21,7 +21,11 @@ namespace SRSProject.Infrastructure.Configuration
                 .IsUnique()
                 .HasDatabaseName("IX_Employees_NationalId");
 
-            
+
+            builder.HasOne(e => e.WeekHoliday)
+                .WithMany()
+                .HasForeignKey(employee => employee.WeekHolidayId)
+                .OnDelete(DeleteBehavior.Cascade);
 
         }
     }
