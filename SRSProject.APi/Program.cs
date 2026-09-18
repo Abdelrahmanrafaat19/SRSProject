@@ -1,6 +1,7 @@
 using Microsoft.OpenApi;
 using SRSProject.Application;
 using SRSProject.Infrastructure;
+using SRSProject.Infrastructure.Extentions;
 using SRSProject.Infrastructure.Jwt;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -34,6 +35,7 @@ builder.Services.AddSwaggerGen(options =>
 });
 
 var app = builder.Build();
+await app.MigrationAndSeedAsync();
 
 if (app.Environment.IsDevelopment())
 {

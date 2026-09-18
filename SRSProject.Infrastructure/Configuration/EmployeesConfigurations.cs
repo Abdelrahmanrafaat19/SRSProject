@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using SRSProject.Domain.Entities;
 using System;
 using System.Collections.Generic;
+using System.Reflection.Emit;
 using System.Text;
 
 namespace SRSProject.Infrastructure.Configuration
@@ -13,9 +14,9 @@ namespace SRSProject.Infrastructure.Configuration
         public void Configure(
             EntityTypeBuilder<EmployeeEntity> builder)
         {
-            
-            
-            
+
+
+
 
             builder.HasIndex(employee => employee.NationalId)
                 .IsUnique()
@@ -26,6 +27,10 @@ namespace SRSProject.Infrastructure.Configuration
                 .WithMany()
                 .HasForeignKey(employee => employee.WeekHolidayId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+
+            builder.Property(x => x.BasicSalary)
+                .HasPrecision(18, 2);
 
         }
     }
