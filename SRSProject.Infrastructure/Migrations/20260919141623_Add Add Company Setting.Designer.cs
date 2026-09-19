@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SRSProject.Infrastructure.DataContext;
 
@@ -11,9 +12,11 @@ using SRSProject.Infrastructure.DataContext;
 namespace SRSProject.Infrastructure.Migrations
 {
     [DbContext(typeof(SRSDbContext))]
-    partial class SRSDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260919141623_Add Add Company Setting")]
+    partial class AddAddCompanySetting
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -287,37 +290,6 @@ namespace SRSProject.Infrastructure.Migrations
                     b.HasIndex("PayrollRecordId");
 
                     b.ToTable("PayrollAdjustment");
-                });
-
-            modelBuilder.Entity("SRSProject.Domain.Entities.PayrollPolicy", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
-
-                    b.Property<decimal>("SocialSecurityRate")
-                        .HasPrecision(18, 4)
-                        .HasColumnType("decimal(18,4)");
-
-                    b.Property<decimal>("TaxRate")
-                        .HasPrecision(18, 4)
-                        .HasColumnType("decimal(18,4)");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("PayrollPolicies");
                 });
 
             modelBuilder.Entity("SRSProject.Domain.Entities.PayrollRecord", b =>

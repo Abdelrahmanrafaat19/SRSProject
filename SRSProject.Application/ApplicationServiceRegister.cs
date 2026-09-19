@@ -19,6 +19,10 @@ namespace SRSProject.Application
             services.AddScoped<IOfficialHolidayService, OfficialHolidayService>();
             services.AddScoped<IWeeklyHolidayService, WeeklyHolidayService>();
             services.AddScoped<IPayrollService, PayrollService>();
+            services.AddScoped<IPayrollPolicyService, PayrollPolicyService>();
+            services.AddScoped<IPayrollCalculationService, PayrollCalculationService>();
+            services.AddScoped<IPayrollReportService, PayrollReportService>();
+            services.AddScoped<ICompanySettingsService, CompanySettingsService>();
             return services;
         }
     }

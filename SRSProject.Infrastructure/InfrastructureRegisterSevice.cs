@@ -37,6 +37,9 @@ namespace SRSProject.Infrastructure
             serviceProvider.AddScoped<IIdentityService, IdentityRepo>();
             serviceProvider.AddScoped<IUserService, UserService>();
             serviceProvider.AddScoped<IJwtCreator, JwtCreator>();
+            // Infrastructure implementations
+            serviceProvider.AddScoped<SRSProject.Application.Contracts.IEncryptionService, SRSProject.Infrastructure.Services.EncryptionService>();
+            serviceProvider.AddScoped<SRSProject.Application.Contracts.IAuditService, SRSProject.Infrastructure.Services.AuditService>();
             var jwtSettings = configuration
                                              .GetSection("JwtSettings")
                                              .Get<JwtSettings>()
