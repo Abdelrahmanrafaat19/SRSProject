@@ -23,6 +23,9 @@ namespace SRSProject.Domain.Entities
 
         public ICollection<AttendanceRecord> AttendanceRecords { get; set; } = [];
 
+
+        public ICollection<PayrollRecord> PayrollRecords { get; set; } = [];
+
         public int? WeekHolidayId { get; set; }
 
         public WeekHolidayEntity? WeekHoliday { get; set; }

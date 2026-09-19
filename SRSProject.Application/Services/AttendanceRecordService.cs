@@ -4,10 +4,8 @@ using SRSProject.Application.Contracts;
 using SRSProject.Application.Dtos;
 using SRSProject.Domain.Contract;
 using SRSProject.Domain.Entities;
-using SRSProject.Infrastructure;
 using SRSProject.Infrastructure.DataContext;
 using StockManagment.Application.common;
-using System.Linq;
 
 namespace SRSProject.Application.Services
 {
