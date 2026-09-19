@@ -15,11 +15,13 @@ namespace SRSProject.Application.Services
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IOfficialHolidayService _officialHolidayService;
+        private readonly IWeeklyHolidayService _weeklyHolidayService;
 
-        public AttendanceRecordService(IUnitOfWork unitOfWork, IOfficialHolidayService officialHolidayService)
+        public AttendanceRecordService(IUnitOfWork unitOfWork, IOfficialHolidayService officialHolidayService, IWeeklyHolidayService weeklyHolidayService)
         {
             _unitOfWork = unitOfWork;
             _officialHolidayService = officialHolidayService;
+            _weeklyHolidayService = weeklyHolidayService;
         }
 
         public async Task<Result<AttendanceReportDto>> GetReportForEmployeeAsync(int? employeeId, DateOnly? from, DateOnly? to)
@@ -29,6 +31,9 @@ namespace SRSProject.Application.Services
                 Day = h.Day,
                 Month = h.Month,
             }).ToList();
+            // load weekly holiday definitions (days of week)
+            var weeklyDtos = (await _weeklyHolidayService.GetAllAsync(CancellationToken.None)).Value ?? new List<WeeklyHolidayDto>();
+            var weeklyDaysSet = weeklyDtos.SelectMany(w => w.DaysOfHoliday ?? new List<DayOfWeek>()).Distinct().ToHashSet();
             var toDate = to ?? DateOnly.FromDateTime(DateTime.Now);
             var fromDate = from ?? toDate;
 
@@ -121,14 +126,23 @@ namespace SRSProject.Application.Services
 
             report.TotalDays = days.Count;
 
-            foreach (var day in days)
+                foreach (var day in days)
             {
+
+                var isWeeklyHoliday = weeklyDaysSet.Contains(day.DayOfWeek);
                 var isOfficialHoliday = officalDays.Any(h => h.Day == day.Day && h.Month == day.Month);
                 var attendance = records.FirstOrDefault(r => r.AttendanceDate == day);
 
+                // Official holiday takes precedence
                 if (isOfficialHoliday)
                 {
                     report.OfficalDays++;
+                    continue;
+                }
+
+                if (isWeeklyHoliday)
+                {
+                    report.WeeklyHolidayDays++;
                     continue;
                 }
 
@@ -196,9 +210,12 @@ namespace SRSProject.Application.Services
         }
         public async Task<Result<bool>> CheckInAsync(CheckInDtos data)
         {
-            // Validate official holiday: do not allow check-in on official holidays
+            // Validate official and weekly holidays
             var officalDays = (await _officialHolidayService.Grid(CancellationToken.None)).Value;
             var isOfficialHoliday = officalDays.Any(h => h.Day == data.AttendanceDate.Day && h.Month == data.AttendanceDate.Month);
+            var weeklyDtos = (await _weeklyHolidayService.GetAllAsync(CancellationToken.None)).Value ?? new List<WeeklyHolidayDto>();
+            var weeklyDaysSet = weeklyDtos.SelectMany(w => w.DaysOfHoliday ?? new List<DayOfWeek>()).Distinct().ToHashSet();
+            var isWeeklyHoliday = weeklyDaysSet.Contains(data.AttendanceDate.DayOfWeek);
         
 
             var repo = _unitOfWork.Repository<int, AttendanceRecord>();
@@ -207,18 +224,49 @@ namespace SRSProject.Application.Services
             {
                 return Result<bool>.Failure(Error.Failure("Validation", "Already checked in for this date"));
             }
-            var workStart = data.AttendanceDate.ToDateTime(new TimeOnly(9, 0));
-            var minutesLate = (data.CheckInTime.ToTimeSpan() - workStart.TimeOfDay).TotalMinutes;
-            var attendance = new AttendanceRecord()
+            if (isOfficialHoliday)
             {
-                AttendanceDate = data.AttendanceDate,
-                CheckInTime = data.CheckInTime,
-                EmployeeId = data.EmployeeId,
-                LateMinutes = minutesLate > 0 ? (int)minutesLate : 0,
-                Status = isOfficialHoliday? AttendanceStatus.Intime : (minutesLate > 0 ? AttendanceStatus.Late : AttendanceStatus.Intime),
-            };
+                // On official holidays we treat as intime (no late)
+                var attendance = new AttendanceRecord()
+                {
+                    AttendanceDate = data.AttendanceDate,
+                    CheckInTime = null,
+                    EmployeeId = data.EmployeeId,
+                    LateMinutes = 0,
+                    Status = AttendanceStatus.Intime,
+                };
 
-            await repo.AddAsync(attendance);
+                await repo.AddAsync(attendance);
+            }
+            else if (isWeeklyHoliday)
+            {
+                // On weekly holidays record the holiday status for the employee
+                var attendance = new AttendanceRecord()
+                {
+                    AttendanceDate = data.AttendanceDate,
+                    CheckInTime = null,
+                    EmployeeId = data.EmployeeId,
+                    LateMinutes = 0,
+                    Status = AttendanceStatus.WeeklyHoliday,
+                };
+
+                await repo.AddAsync(attendance);
+            }
+            else
+            {
+                var workStart = data.AttendanceDate.ToDateTime(new TimeOnly(9, 0));
+                var minutesLate = (data.CheckInTime.ToTimeSpan() - workStart.TimeOfDay).TotalMinutes;
+                var attendance = new AttendanceRecord()
+                {
+                    AttendanceDate = data.AttendanceDate,
+                    CheckInTime = data.CheckInTime,
+                    EmployeeId = data.EmployeeId,
+                    LateMinutes = minutesLate > 0 ? (int)minutesLate : 0,
+                    Status = minutesLate > 0 ? AttendanceStatus.Late : AttendanceStatus.Intime,
+                };
+
+                await repo.AddAsync(attendance);
+            }
 
             var result = await _unitOfWork.SaveChangesAsync();
             if (result > 0)
@@ -234,16 +282,42 @@ namespace SRSProject.Application.Services
             // Validate official holiday: do not allow check-out on official holidays
             var officalDays = (await _officialHolidayService.Grid(CancellationToken.None)).Value;
             var isOfficialHoliday = officalDays.Any(h => h.Day == data.AttendanceDate.Day && h.Month == data.AttendanceDate.Month);
-         
+            var weeklyDtos = (await _weeklyHolidayService.GetAllAsync(CancellationToken.None)).Value ?? new List<WeeklyHolidayDto>();
+            var weeklyDaysSet = weeklyDtos.SelectMany(w => w.DaysOfHoliday ?? new List<DayOfWeek>()).Distinct().ToHashSet();
+            var isWeeklyHoliday = weeklyDaysSet.Contains(data.AttendanceDate.DayOfWeek);
+
 
             var repo = _unitOfWork.Repository<int, AttendanceRecord>();
 
             var records = await repo.FindAsync(a => a.EmployeeId == data.EmployeeId && a.AttendanceDate == data.AttendanceDate);
             var attendance = records.FirstOrDefault();
 
+            if (isOfficialHoliday)
+            {
+                // No checkout needed on official holidays
+                return Result<bool>.Success(true);
+            }
+
+            if (isWeeklyHoliday)
+            {
+                // No checkout needed on weekly holidays
+                // Optionally create record if missing
+                if (attendance == null)
+                {
+                    await repo.AddAsync(new AttendanceRecord
+                    {
+                        AttendanceDate = data.AttendanceDate,
+                        EmployeeId = data.EmployeeId,
+                        Status = AttendanceStatus.WeeklyHoliday
+                    });
+                    await _unitOfWork.SaveChangesAsync();
+                }
+
+                return Result<bool>.Success(true);
+            }
+
             if (attendance == null)
             {
-
                 return Result<bool>.Failure(Error.Failure("Validation", "No check-in record found for this employee and date"));
             }
 

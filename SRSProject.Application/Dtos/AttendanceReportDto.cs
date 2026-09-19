@@ -14,6 +14,7 @@ namespace SRSProject.Application.Dtos
         public int LateDays { get; set; }
         public int AbsentDays { get; set; }
         public int IntimeDays { get; set; }
+        public int WeeklyHolidayDays { get; set; }
         public int OfficalDays { get; set; }
 
         // Total not-completed minutes (converted to hours when showing)
